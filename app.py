@@ -11,6 +11,8 @@ class Translator:
 
     def __init__(self, window):
 
+        self.is_recording=False
+
         window.title("Translator")
         width = window.winfo_screenwidth()
         height = window.winfo_screenheight()
@@ -31,7 +33,9 @@ class Translator:
 
         self.button.image = photo
         self.button.pack(pady=50)
-
+        self.background_label = tk.Label(window,text="Recording..")
+        self.background_label.config(fg="red")
+        self.background_label.pack_forget()
     def voice_to_text(self):
         print("start recording")
         r = sr.Recognizer()
@@ -44,7 +48,6 @@ class Translator:
                 self.text.delete(1.0, "end")
                 self.text.insert(1.0, message)
                 self.text.config(state="disabled")
-                self.text.see(tk.END)
             except sr.UnknownValueError:
                 print('Speech Recognition could not Understand audio')
                 self.voice_to_text()
@@ -54,9 +57,17 @@ class Translator:
             else:
                 pass
         print("finished")
+        self.is_recording=False
+        self.background_label.pack_forget()
+
 
     def on_button(self):
-        thread_pool_executor.submit(self.voice_to_text)
+        if not self.is_recording:
+            self.background_label.pack(side="bottom",fill="x")
+            thread_pool_executor.submit(self.voice_to_text)
+            self.is_recording=True
+        else:
+            print("Recording")
 
 
 if __name__ == '__main__':
